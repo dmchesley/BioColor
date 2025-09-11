@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BioColorGv0.1</title>
+    <title>BioColorGv0.2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
     <style>
@@ -43,22 +43,22 @@
         </button>
     </div>
     
-    <!-- Navigation Menu to switch between pages -->
-    <nav class="sticky top-[90px] md:top-[50px] z-50 bg-stone-900 shadow-lg px-4 py-3 flex justify-center space-x-4">
-        <button id="nav-colors" onclick="showPage('page1')" class="nav-button bg-stone-800 hover:bg-stone-700 text-white font-bold py-2 px-4 md:py-3 md:px-6 rounded-md transition-colors duration-200 text-base md:text-lg">
-            Colors
-        </button>
-        <button id="nav-bars" onclick="showPage('page2')" class="nav-button bg-stone-800 hover:bg-stone-700 text-white font-bold py-2 px-4 md:py-3 md:px-6 rounded-md transition-colors duration-200 text-base md:text-lg">
-            Bars
-        </button>
-        <button id="nav-today" onclick="showPage('page3')" class="nav-button bg-stone-800 hover:bg-stone-700 text-white font-bold py-2 px-4 md:py-3 md:px-6 rounded-md transition-colors duration-200 text-base md:text-lg">
-            Today
-        </button>
-    </nav>
-
-    <!-- Main container for the pages -->
-    <main class="flex-1 flex flex-col items-center mt-1 px-4 sm:px-8 lg:px-12 pb-16">
-        <div class="w-full max-w-4xl flex flex-col rounded-lg flex-1">
+    <!-- Main container for the pages, now with a horizontal layout -->
+    <main class="flex-1 flex flex-row items-start mt-1 px-4 sm:px-8 lg:px-12 pb-16">
+        <!-- Navigation Menu to switch between pages -->
+        <nav class="flex flex-col space-y-4 pr-4 mt-12">
+            <button id="nav-colors" onclick="showPage('page1')" class="nav-button bg-stone-800 hover:bg-stone-700 text-white font-bold py-2 px-4 md:py-3 md:px-6 rounded-md transition-colors duration-200 text-base md:text-lg">
+                Colors
+            </button>
+            <button id="nav-bars" onclick="showPage('page2')" class="nav-button bg-stone-800 hover:bg-stone-700 text-white font-bold py-2 px-4 md:py-3 md:px-6 rounded-md transition-colors duration-200 text-base md:text-lg">
+                Bars
+            </button>
+            <button id="nav-today" onclick="showPage('page3')" class="nav-button bg-stone-800 hover:bg-stone-700 text-white font-bold py-2 px-4 md:py-3 md:px-6 rounded-md transition-colors duration-200 text-base md:text-lg">
+                Today
+            </button>
+        </nav>
+    
+        <div class="w-full flex flex-col rounded-lg flex-1">
             <!-- Consolidated Calendar Container -->
             <div id="calendar-container" class="w-full p-4 sm:p-6 bg-stone-900 rounded-lg flex flex-col mb-0 flex-1">
                 <div class="weekdays-header grid grid-cols-7 gap-1 text-center font-medium text-sm sm:text-base"></div>
@@ -250,7 +250,7 @@
 
             for (let i = 0; i < firstDay; i++) {
                 const emptyCell = document.createElement('div');
-                emptyCell.classList.add('w-full', 'rounded', 'p-1', 'min-h-[2rem]');
+                emptyCell.classList.add('w-full', 'rounded', 'p-1', 'min-h-[5rem]');
                 daysGrid.appendChild(emptyCell);
             }
 
@@ -258,7 +258,7 @@
                 const dayCell = document.createElement('div');
                 
                 const classes = [
-                    'w-full', 'rounded', 'p-1', 'min-h-[2rem]', 'bg-red-800', 'shadow-inner', 'shadow-red-900',
+                    'w-full', 'rounded', 'p-1', 'min-h-[5rem]', 'bg-red-800', 'shadow-inner', 'shadow-red-900',
                     'flex', 'items-start', 'justify-start', 'text-sm', 'sm:text-base', 
                     'hover:bg-red-700', 'transition-colors', 'duration-200'
                 ];
@@ -316,4 +316,3 @@
 </html>
 
 
-u
