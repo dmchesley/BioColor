@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BioColorGv0.2</title>
+    <title>BioColorGv0.3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
     <style>
@@ -20,49 +20,64 @@
         .biorhythm-crit-marker {
             width: 0;
             height: 0;
-            border-left: 8px solid transparent;
-            border-right: 8px solid transparent;
-            border-bottom: 12px solid #f97316; /* Orange color */
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-bottom: 18px solid #f97316; /* Orange color */
             transition: opacity 0.2s;
+        }
+        /* Adds a thin black outline for the markers on the Colors page */
+        .biorhythm-crit-marker.black-outlined-marker {
+            filter: drop-shadow(0 0 1px black);
+        }
+        /* Adds a thin white outline for the marker in the key */
+        .biorhythm-crit-marker.white-outlined-marker {
+            filter: drop-shadow(0 0 1px white);
         }
     </style>
 </head>
 <body class="bg-stone-950 flex flex-col min-h-screen text-gray-200">
 
-    <!-- Month and Year Selectors and new Birthday Selector -->
+    <!-- Sticky Top Header Container -->
     <div id="controls-container" class="sticky top-0 z-50 bg-stone-900 shadow-lg px-4 py-3 flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0 md:space-x-4">
         
         <!-- Birthday Picker -->
-        <div id="birthday-picker" class="flex items-center space-x-2 text-sm md:text-base">
-            <label for="bday-month-select">Birthday:</label>
-            <select id="bday-month-select" class="bg-stone-800 text-white rounded-md p-1 md:p-2" onchange="updateBirthday()"></select>
-            <select id="bday-day-select" class="bg-stone-800 text-white rounded-md p-1 md:p-2" onchange="updateBirthday()"></select>
-            <select id="bday-year-select" class="bg-stone-800 text-white rounded-md p-1 md:p-2" onchange="updateBirthday()"></select>
+        <div id="birthday-picker-container" class="flex flex-col items-center space-y-2 text-lg md:text-xl">
+            <div class="flex items-center space-x-2">
+                <label for="bday-month-select">Birthday:</label>
+                <select id="bday-month-select" class="bg-stone-800 text-white rounded-md p-1 md:p-2 text-lg md:text-xl" onchange="updateBirthday()"></select>
+                <select id="bday-day-select" class="bg-stone-800 text-white rounded-md p-1 md:p-2 text-lg md:text-xl" onchange="updateBirthday()"></select>
+                <select id="bday-year-select" class="bg-stone-800 text-white rounded-md p-1 md:p-2 text-lg md:text-xl" onchange="updateBirthday()"></select>
+            </div>
+            <p id="birthday-reminder" class="text-sm text-yellow-400 hidden">
+                This is a default birthday. Please select your own!
+            </p>
         </div>
 
-        <!-- Current Date and Week Start Toggles -->
+        <!-- Month/Year selectors for Colors/Bars page -->
         <div id="month-year-selectors" class="flex items-center space-x-2">
             <button class="prev-month-btn bg-stone-800 hover:bg-stone-700 text-white font-bold py-1 px-3 md:py-2 md:px-4 rounded-full text-base md:text-xl" onclick="changeMonth('prev')">&lt;</button>
             <select id="month-select" class="bg-stone-800 text-white rounded-md p-1 md:p-2 text-base md:text-xl" onchange="updateCalendarFromSelects()"></select>
             <select id="year-select" class="bg-stone-800 text-white rounded-md p-1 md:p-2 text-base md:text-xl" onchange="updateCalendarFromSelects()"></select>
             <button class="next-month-btn bg-stone-800 hover:bg-stone-700 text-white font-bold py-1 px-3 md:py-2 md:px-4 rounded-full text-base md:text-xl" onclick="changeMonth('next')">&gt;</button>
         </div>
+
+        <!-- Week Start Toggle for Colors/Bars page -->
         <button id="week-start-toggle" onclick="toggleWeekStart()" class="bg-stone-800 hover:bg-stone-700 text-white font-bold py-1 px-3 md:py-2 md:px-4 rounded-md transition-colors duration-200 text-base md:text-lg">
             Begin week on Monday
         </button>
     </div>
     
-    <!-- Main container for the pages, now with a horizontal layout -->
-    <main class="flex-1 flex flex-row items-start mt-1 px-4 sm:px-8 lg:px-12 pb-16">
+    <!-- Main container for the pages -->
+    <main class="flex-1 flex flex-row items-start px-4 sm:px-8 lg:px-12 pb-24">
         <!-- Navigation Menu to switch between pages -->
-        <nav class="flex flex-col space-y-4 pr-4 mt-12">
+        <nav class="flex flex-col space-y-4 pr-4 pt-16">
             <button id="nav-colors" onclick="showPage('page1')" class="nav-button bg-stone-800 hover:bg-stone-700 text-white font-bold py-2 px-4 md:py-3 md:px-6 rounded-md transition-colors duration-200 text-base md:text-lg">
                 Colors
             </button>
             <button id="nav-bars" onclick="showPage('page2')" class="nav-button bg-stone-800 hover:bg-stone-700 text-white font-bold py-2 px-4 md:py-3 md:px-6 rounded-md transition-colors duration-200 text-base md:text-lg">
                 Bars
             </button>
-            <button id="nav-today" onclick="showPage('page3')" class="nav-button bg-stone-800 hover:bg-stone-700 text-white font-bold py-2 px-4 md:py-3 md:px-6 rounded-md transition-colors duration-200 text-base md:text-lg">
+            <button id="nav-today" onclick="todayDate = new Date(); showPage('page3')" class="nav-button bg-stone-800 hover:bg-stone-700 text-white font-bold py-2 px-4 md:py-3 md:px-6 rounded-md transition-colors duration-200 text-base md:text-lg">
                 Today
             </button>
             <button id="nav-help" onclick="showPage('page4')" class="nav-button bg-stone-800 hover:bg-stone-700 text-white font-bold py-2 px-4 md:py-3 md:px-6 rounded-md transition-colors duration-200 text-base md:text-lg">
@@ -70,31 +85,35 @@
             </button>
             <!-- Label for Critical Days -->
             <div id="critical-day-label" class="flex flex-col items-center mt-4">
-                <div class="biorhythm-crit-marker mb-1"></div>
-                <span class="text-xs text-stone-400">Critical Day</span>
+                <div class="biorhythm-crit-marker white-outlined-marker mb-1"></div>
+                <span class="text-xs text-white">Critical Day</span>
             </div>
         </nav>
     
         <div class="w-full flex flex-col rounded-lg flex-1">
-            <!-- Consolidated Calendar Container -->
-            <div id="calendar-container" class="w-full p-4 sm:p-6 bg-stone-900 rounded-lg flex flex-col mb-0 flex-1">
-                <div class="weekdays-header grid grid-cols-7 gap-1 text-center font-medium text-sm sm:text-base"></div>
+            <!-- Calendar Container for Colors and Bars pages -->
+            <div id="calendar-container" class="page-content hidden w-full p-4 sm:p-6 bg-stone-900 rounded-lg flex flex-col mb-0 flex-1">
+                <div class="weekdays-header grid grid-cols-7 gap-1 text-center font-bold text-lg text-white"></div>
                 <div class="days-grid grid grid-cols-7 gap-1 mt-2 flex-1"></div>
             </div>
 
             <!-- Page 3 Content (Today) -->
-            <div id="page3" class="page-content hidden flex-col flex-1">
-                <h1 class="text-3xl sm:text-4xl font-bold mb-4">Today</h1>
-                <p class="text-lg mb-6">
-                    This page is ready for your content.
-                </p>
-                <div class="bg-red-800 rounded-xl p-6 flex flex-col items-center justify-center flex-1">
-                    <p class="text-gray-400 text-center italic">
-                        Your drawing area for Page 3.
-                    </p>
+            <div id="page3-content" class="page-content hidden w-full flex-col flex-1 p-4 sm:p-6 bg-stone-900 rounded-lg">
+                <!-- Today Date Picker -->
+                <div class="flex flex-col items-center mb-6">
+                    <label class="text-lg md:text-xl font-bold mb-2">Biorhythm for:</label>
+                    <div id="today-date-picker" class="flex items-center space-x-2 justify-center">
+                        <button class="prev-day-btn bg-stone-800 hover:bg-stone-700 text-white font-bold py-1 px-3 md:py-2 md:px-4 rounded-full text-base md:text-xl" onclick="changeDay('prev')">&lt;</button>
+                        <select id="today-month-select" class="bg-stone-800 text-white rounded-md p-1 md:p-2 text-lg md:text-xl" onchange="updateTodayFromSelects()"></select>
+                        <select id="today-day-select" class="bg-stone-800 text-white rounded-md p-1 md:p-2 text-lg md:text-xl" onchange="updateTodayFromSelects()"></select>
+                        <select id="today-year-select" class="bg-stone-800 text-white rounded-md p-1 md:p-2 text-lg md:text-xl" onchange="updateTodayFromSelects()"></select>
+                        <button class="next-day-btn bg-stone-800 hover:bg-stone-700 text-white font-bold py-1 px-3 md:py-2 md:px-4 rounded-full text-base md:text-xl" onclick="changeDay('next')">&gt;</button>
+                    </div>
+                    <span id="today-date-text" class="text-xl md:text-2xl font-bold mt-2"></span>
                 </div>
+                <div id="today-display-grid" class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4 flex-1"></div>
             </div>
-
+            
             <!-- Page 4 Content (Help) -->
             <div id="page4" class="page-content hidden flex-col flex-1 p-4 sm:p-6 bg-stone-900 rounded-lg">
                 <h1 class="text-3xl sm:text-4xl font-bold mb-4">What Are Biorhythms?</h1>
@@ -119,6 +138,7 @@
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         const weekdayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
         let currentDate = new Date();
+        let todayDate = new Date(); // Separate date for the 'Today' page
         let currentPageId = 'page1';
         let startWeekOnMonday = false;
         let birthday = new Date(); // Default birthday is today
@@ -175,7 +195,7 @@
             updateBirthdayDays();
         }
 
-        // Updates the day selector based on the selected month and year
+        // Updates the day selector for birthday based on the selected month and year
         function updateBirthdayDays() {
             const bdayMonthSelect = document.getElementById('bday-month-select');
             const bdayDaySelect = document.getElementById('bday-day-select');
@@ -210,7 +230,15 @@
             const bdayYear = document.getElementById('bday-year-select').value;
             
             birthday = new Date(bdayYear, bdayMonth, bdayDay);
-            renderCalendar();
+            // Save the new birthday to local storage
+            localStorage.setItem('savedBirthday', birthday.toISOString());
+            document.getElementById('birthday-reminder').classList.add('hidden');
+            
+            if (currentPageId === 'page1' || currentPageId === 'page2') {
+                renderCalendar();
+            } else if (currentPageId === 'page3') {
+                renderTodayPage();
+            }
         }
 
         // Populates the calendar month and year dropdowns
@@ -236,6 +264,99 @@
             }
         }
 
+        // Populates the "Today" page date selectors
+        function populateTodaySelectors() {
+            const monthSelect = document.getElementById('today-month-select');
+            const daySelect = document.getElementById('today-day-select');
+            const yearSelect = document.getElementById('today-year-select');
+
+            monthSelect.innerHTML = '';
+            monthNames.forEach((month, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = month;
+                monthSelect.appendChild(option);
+            });
+
+            const currentYear = new Date().getFullYear();
+            yearSelect.innerHTML = '';
+            for (let i = currentYear - 50; i <= currentYear + 50; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                yearSelect.appendChild(option);
+            }
+
+            updateTodayDays();
+        }
+
+        // Updates the day selector for the "Today" page
+        function updateTodayDays() {
+            const monthSelect = document.getElementById('today-month-select');
+            const daySelect = document.getElementById('today-day-select');
+            const yearSelect = document.getElementById('today-year-select');
+            
+            const selectedMonth = parseInt(monthSelect.value);
+            const selectedYear = parseInt(yearSelect.value);
+            const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
+
+            daySelect.innerHTML = '';
+            for (let i = 1; i <= daysInMonth; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                daySelect.appendChild(option);
+            }
+
+            const currentDay = todayDate.getDate();
+            if (currentDay <= daysInMonth) {
+                daySelect.value = currentDay;
+            } else {
+                daySelect.value = 1;
+            }
+        }
+
+        // Handles changing the day with arrows on the "Today" page
+        function changeDay(direction) {
+            if (direction === 'prev') {
+                todayDate.setDate(todayDate.getDate() - 1);
+            } else {
+                todayDate.setDate(todayDate.getDate() + 1);
+            }
+            updateTodaySelectorsFromDate();
+        }
+
+        // Updates the "Today" page selectors and text to match the todayDate
+        function updateTodaySelectorsFromDate() {
+            document.getElementById('today-month-select').value = todayDate.getMonth();
+            document.getElementById('today-day-select').value = todayDate.getDate();
+            document.getElementById('today-year-select').value = todayDate.getFullYear();
+            updateTodayDateText();
+            renderTodayPage();
+        }
+
+        // Handles changing the date on the "Today" page selectors
+        function updateTodayFromSelects() {
+            const month = document.getElementById('today-month-select').value;
+            const day = document.getElementById('today-day-select').value;
+            const year = document.getElementById('today-year-select').value;
+            todayDate.setMonth(month);
+            todayDate.setFullYear(year);
+            todayDate.setDate(day);
+            updateTodayDateText();
+            renderTodayPage();
+        }
+
+        // Updates the text display with the full formatted date
+        function updateTodayDateText() {
+            const dayOfWeek = weekdayNames[todayDate.getDay()];
+            const month = monthNames[todayDate.getMonth()];
+            const day = todayDate.getDate();
+            const year = todayDate.getFullYear();
+            const dateString = `${dayOfWeek}, ${month} ${day}, ${year}`;
+            document.getElementById('today-date-text').textContent = dateString;
+        }
+
         // Toggles between Sunday and Monday week start
         function toggleWeekStart() {
             startWeekOnMonday = !startWeekOnMonday;
@@ -251,6 +372,8 @@
             } else {
                 currentDate.setMonth(currentDate.getMonth() + 1);
             }
+            // Fix: Directly call renderCalendar after changing the date.
+            // The previous code called updateCalendarFromSelects(), which reset the month.
             renderCalendar();
         }
 
@@ -263,15 +386,16 @@
             renderCalendar();
         }
 
-        // Renders the calendar for the selected page
+        // Renders the calendar for the Colors and Bars pages
         function renderCalendar() {
             const container = document.getElementById('calendar-container');
             if (!container) return;
             
             const weekdaysHeader = container.querySelector('.weekdays-header');
-            weekdaysHeader.innerHTML = '';
-
             const daysGrid = container.querySelector('.days-grid');
+
+            // Clear previous content
+            weekdaysHeader.innerHTML = '';
             daysGrid.innerHTML = '';
             
             const month = currentDate.getMonth();
@@ -295,7 +419,7 @@
             }
             reorderedWeekdays.forEach(day => {
                 const headerDiv = document.createElement('div');
-                headerDiv.classList.add('text-stone-400');
+                headerDiv.classList.add('text-lg', 'text-white');
                 headerDiv.textContent = day;
                 weekdaysHeader.appendChild(headerDiv);
             });
@@ -309,29 +433,25 @@
             for (let i = 1; i <= daysInMonth; i++) {
                 const dayCell = document.createElement('div');
                 const dayDate = new Date(year, month, i);
-                
-                // Get the biorhythm values for the day
                 const { physical, emotional, intellectual } = calculateBiorhythms(dayDate);
-                
-                // Common classes for all day cells
-                const classes = [
-                    'w-full', 'rounded', 'px-1', 'min-h-[5rem]', 'shadow-inner',
-                    'relative', 'transition-colors', 'duration-200'
-                ];
-
+                const classes = ['w-full', 'rounded', 'px-1', 'min-h-[5rem]', 'shadow-inner', 'relative', 'transition-colors', 'duration-200', 'cursor-pointer'];
                 const dayNumberDiv = document.createElement('div');
                 dayNumberDiv.classList.add('absolute', 'top-1', 'left-1', 'text-sm', 'sm:text-base');
                 dayNumberDiv.textContent = i;
+
+                // Add click event listener to each day cell
+                dayCell.addEventListener('click', () => {
+                    todayDate = dayDate;
+                    showPage('page3');
+                });
                 
                 if (currentPageId === 'page1') {
-                    // Map emotional to red, physical to green, and intellectual to blue
                     const r = Math.floor((emotional + 1) / 2 * 255);
                     const g = Math.floor((physical + 1) / 2 * 255);
                     const b = Math.floor((intellectual + 1) / 2 * 255);
                     
                     dayCell.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
                     
-                    // Calculate perceived luminance to determine text color
                     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
                     let textColor = 'white';
                     if (luminance > 0.5) {
@@ -339,7 +459,6 @@
                     }
                     dayNumberDiv.style.color = textColor;
                     
-                    // Scale values to 0-100 for the labels
                     const scaledEmotional = Math.floor((emotional + 1) / 2 * 100);
                     const scaledPhysical = Math.floor((physical + 1) / 2 * 100);
                     const scaledIntellectual = Math.floor((intellectual + 1) / 2 * 100);
@@ -353,32 +472,27 @@
                     dayCell.appendChild(labelDiv);
                     classes.push('border');
 
-                    // Add critical day markers
                     const critMarkerContainer = document.createElement('div');
                     critMarkerContainer.classList.add('absolute', 'bottom-1', 'left-0', 'right-0', 'flex', 'justify-between', 'px-1');
                     
                     const markerE = document.createElement('div');
-                    markerE.classList.add('biorhythm-crit-marker');
+                    markerE.classList.add('biorhythm-crit-marker', 'black-outlined-marker');
                     markerE.style.opacity = Math.abs(emotional) < 0.1 ? 1 : 0;
                     critMarkerContainer.appendChild(markerE);
 
                     const markerP = document.createElement('div');
-                    markerP.classList.add('biorhythm-crit-marker');
+                    markerP.classList.add('biorhythm-crit-marker', 'black-outlined-marker');
                     markerP.style.opacity = Math.abs(physical) < 0.1 ? 1 : 0;
                     critMarkerContainer.appendChild(markerP);
 
                     const markerI = document.createElement('div');
-                    markerI.classList.add('biorhythm-crit-marker');
+                    markerI.classList.add('biorhythm-crit-marker', 'black-outlined-marker');
                     markerI.style.opacity = Math.abs(intellectual) < 0.1 ? 1 : 0;
                     critMarkerContainer.appendChild(markerI);
 
                     dayCell.appendChild(critMarkerContainer);
-
-
                 } else if (currentPageId === 'page2') {
                     dayCell.classList.add('border');
-
-                    // Scale values to 0-100 for the bars
                     const scaledEmotional = Math.floor((emotional + 1) / 2 * 100);
                     const scaledPhysical = Math.floor((physical + 1) / 2 * 100);
                     const scaledIntellectual = Math.floor((intellectual + 1) / 2 * 100);
@@ -386,50 +500,42 @@
                     dayNumberDiv.classList.add('bg-black', 'bg-opacity-50', 'text-white', 'px-1', 'rounded-sm', 'z-10');
                     dayCell.appendChild(dayNumberDiv);
 
-                    // Bar chart container
                     const barContainer = document.createElement('div');
                     barContainer.classList.add('absolute', 'bottom-0', 'left-0', 'right-0', 'h-full', 'flex', 'items-end', 'p-1', 'space-x-1');
 
-                    // Emotional bar (Red)
                     const redBar = document.createElement('div');
                     redBar.classList.add('flex-1', 'bg-red-500', 'rounded-t-sm', 'border-t-2', 'border-white', 'relative');
                     redBar.style.height = `${scaledEmotional}%`;
                     if (Math.abs(emotional) < 0.1) {
                         const critMarker = document.createElement('div');
                         critMarker.classList.add('biorhythm-crit-marker', 'absolute', 'left-1/2', '-translate-x-1/2');
-                        critMarker.style.top = '-18px';
+                        critMarker.style.top = '-22px';
                         redBar.appendChild(critMarker);
                     }
                     barContainer.appendChild(redBar);
 
-                    // Physical bar (Green)
                     const greenBar = document.createElement('div');
                     greenBar.classList.add('flex-1', 'bg-green-500', 'rounded-t-sm', 'border-t-2', 'border-white', 'relative');
                     greenBar.style.height = `${scaledPhysical}%`;
                     if (Math.abs(physical) < 0.1) {
                         const critMarker = document.createElement('div');
                         critMarker.classList.add('biorhythm-crit-marker', 'absolute', 'left-1/2', '-translate-x-1/2');
-                        critMarker.style.top = '-18px';
+                        critMarker.style.top = '-22px';
                         greenBar.appendChild(critMarker);
                     }
                     barContainer.appendChild(greenBar);
                     
-                    // Intellectual bar (Blue)
                     const blueBar = document.createElement('div');
                     blueBar.classList.add('flex-1', 'bg-blue-500', 'rounded-t-sm', 'border-t-2', 'border-white', 'relative');
                     blueBar.style.height = `${scaledIntellectual}%`;
                     if (Math.abs(intellectual) < 0.1) {
                         const critMarker = document.createElement('div');
                         critMarker.classList.add('biorhythm-crit-marker', 'absolute', 'left-1/2', '-translate-x-1/2');
-                        critMarker.style.top = '-18px';
+                        critMarker.style.top = '-22px';
                         blueBar.appendChild(critMarker);
                     }
                     barContainer.appendChild(blueBar);
-
                     dayCell.appendChild(barContainer);
-
-                } else {
-                    classes.push('bg-red-800');
                 }
                 
                 if (isCurrentMonth && i === today.getDate()) {
@@ -441,53 +547,183 @@
             }
         }
 
+        // Renders the single day view for the "Today" page
+        function renderTodayPage() {
+            const displayGrid = document.getElementById('today-display-grid');
+            displayGrid.innerHTML = '';
+            
+            const { physical, emotional, intellectual } = calculateBiorhythms(todayDate);
+
+            // --- Colors View ---
+            const colorsDayCell = document.createElement('div');
+            const r = Math.floor((emotional + 1) / 2 * 255);
+            const g = Math.floor((physical + 1) / 2 * 255);
+            const b = Math.floor((intellectual + 1) / 2 * 255);
+            colorsDayCell.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+            
+            const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+            const textColor = luminance > 0.5 ? 'black' : 'white';
+            
+            colorsDayCell.classList.add('w-full', 'md:w-1/2', 'aspect-video', 'rounded-lg', 'border', 'shadow-inner', 'relative', 'transition-colors', 'duration-200', 'flex', 'flex-col', 'items-center', 'justify-center', 'p-4');
+            
+            const critLabelContainer = document.createElement('div');
+            critLabelContainer.classList.add('absolute', 'top-1/2', 'left-1/2', '-translate-x-1/2', '-translate-y-1/2', 'flex', 'flex-col', 'items-center', 'space-y-1', 'z-20');
+            
+            // Increased font size of labels
+            const labelClasses = ['text-xl', 'sm:text-2xl', 'font-bold', 'text-center'];
+
+            if (Math.abs(emotional) < 0.1) {
+                const labelE = document.createElement('span');
+                labelE.classList.add(...labelClasses);
+                labelE.style.color = textColor;
+                labelE.textContent = "Critical Emotional Day";
+                critLabelContainer.appendChild(labelE);
+            }
+            if (Math.abs(physical) < 0.1) {
+                const labelP = document.createElement('span');
+                labelP.classList.add(...labelClasses);
+                labelP.style.color = textColor;
+                labelP.textContent = "Critical Physical Day";
+                critLabelContainer.appendChild(labelP);
+            }
+            if (Math.abs(intellectual) < 0.1) {
+                const labelI = document.createElement('span');
+                labelI.classList.add(...labelClasses);
+                labelI.style.color = textColor;
+                labelI.textContent = "Critical Intellectual Day";
+                critLabelContainer.appendChild(labelI);
+            }
+            colorsDayCell.appendChild(critLabelContainer);
+
+            const critMarkerContainerColors = document.createElement('div');
+            critMarkerContainerColors.classList.add('absolute', 'bottom-4', 'left-0', 'right-0', 'flex', 'justify-around', 'px-1');
+            
+            const markerEColors = document.createElement('div');
+            markerEColors.classList.add('biorhythm-crit-marker', 'black-outlined-marker');
+            markerEColors.style.opacity = Math.abs(emotional) < 0.1 ? 1 : 0;
+            critMarkerContainerColors.appendChild(markerEColors);
+
+            const markerPColors = document.createElement('div');
+            markerPColors.classList.add('biorhythm-crit-marker', 'black-outlined-marker');
+            markerPColors.style.opacity = Math.abs(physical) < 0.1 ? 1 : 0;
+            critMarkerContainerColors.appendChild(markerPColors);
+
+            const markerIColors = document.createElement('div');
+            markerIColors.classList.add('biorhythm-crit-marker', 'black-outlined-marker');
+            markerIColors.style.opacity = Math.abs(intellectual) < 0.1 ? 1 : 0;
+            critMarkerContainerColors.appendChild(markerIColors);
+
+            colorsDayCell.appendChild(critMarkerContainerColors);
+            displayGrid.appendChild(colorsDayCell);
+
+
+            // --- Bars View ---
+            const barsDayCell = document.createElement('div');
+            barsDayCell.classList.add('w-full', 'md:w-1/2', 'aspect-video', 'rounded-lg', 'border', 'shadow-inner', 'relative', 'transition-colors', 'duration-200', 'flex', 'flex-col', 'items-center', 'justify-center', 'p-4', 'bg-stone-800');
+
+            const scaledEmotionalBars = Math.floor((emotional + 1) / 2 * 100);
+            const scaledPhysicalBars = Math.floor((physical + 1) / 2 * 100);
+            const scaledIntellectualBars = Math.floor((intellectual + 1) / 2 * 100);
+
+            const barContainer = document.createElement('div');
+            barContainer.classList.add('w-full', 'h-full', 'flex', 'items-end', 'p-2', 'space-x-4', 'justify-center');
+
+            const redBar = document.createElement('div');
+            redBar.classList.add('flex-1', 'bg-red-500', 'rounded-t-lg', 'border-t-2', 'border-white', 'relative');
+            redBar.style.height = `${scaledEmotionalBars}%`;
+            const redLabel = document.createElement('span');
+            redLabel.classList.add('absolute', '-top-6', 'text-sm', 'md:text-base', 'font-bold', 'w-full', 'text-center');
+            redLabel.textContent = `E:${scaledEmotionalBars}`;
+            redBar.appendChild(redLabel);
+            if (Math.abs(emotional) < 0.1) {
+                const critMarker = document.createElement('div');
+                critMarker.classList.add('biorhythm-crit-marker', 'black-outlined-marker', 'absolute', 'left-1/2', '-translate-x-1/2');
+                critMarker.style.top = '2px';
+                redBar.appendChild(critMarker);
+            }
+            barContainer.appendChild(redBar);
+
+            const greenBar = document.createElement('div');
+            greenBar.classList.add('flex-1', 'bg-green-500', 'rounded-t-lg', 'border-t-2', 'border-white', 'relative');
+            greenBar.style.height = `${scaledPhysicalBars}%`;
+            const greenLabel = document.createElement('span');
+            greenLabel.classList.add('absolute', '-top-6', 'text-sm', 'md:text-base', 'font-bold', 'w-full', 'text-center');
+            greenLabel.textContent = `P:${scaledPhysicalBars}`;
+            greenBar.appendChild(greenLabel);
+            if (Math.abs(physical) < 0.1) {
+                const critMarker = document.createElement('div');
+                critMarker.classList.add('biorhythm-crit-marker', 'black-outlined-marker', 'absolute', 'left-1/2', '-translate-x-1/2');
+                critMarker.style.top = '2px';
+                greenBar.appendChild(critMarker);
+            }
+            barContainer.appendChild(greenBar);
+            
+            const blueBar = document.createElement('div');
+            blueBar.classList.add('flex-1', 'bg-blue-500', 'rounded-t-lg', 'border-t-2', 'border-white', 'relative');
+            blueBar.style.height = `${scaledIntellectualBars}%`;
+            const blueLabel = document.createElement('span');
+            blueLabel.classList.add('absolute', '-top-6', 'text-sm', 'md:text-base', 'font-bold', 'w-full', 'text-center');
+            blueLabel.textContent = `I:${scaledIntellectualBars}`;
+            blueBar.appendChild(blueLabel);
+            if (Math.abs(intellectual) < 0.1) {
+                const critMarker = document.createElement('div');
+                critMarker.classList.add('biorhythm-crit-marker', 'black-outlined-marker', 'absolute', 'left-1/2', '-translate-x-1/2');
+                critMarker.style.top = '2px';
+                blueBar.appendChild(critMarker);
+            }
+            barContainer.appendChild(blueBar);
+
+            barsDayCell.appendChild(barContainer);
+            displayGrid.appendChild(barsDayCell);
+        }
+
         // JavaScript to handle page visibility
         function showPage(pageId) {
             currentPageId = pageId;
-            const calendarContainer = document.getElementById('calendar-container');
-            const todayPage = document.getElementById('page3');
-            const helpPage = document.getElementById('page4');
-            const criticalDayLabel = document.getElementById('critical-day-label');
-            
+            const pageContents = document.querySelectorAll('.page-content');
             const navButtons = document.querySelectorAll('.nav-button');
-            navButtons.forEach(button => {
-                button.classList.remove('active-nav-button');
-            });
+            const controlsContainer = document.getElementById('controls-container');
+            const monthYearSelectors = document.getElementById('month-year-selectors');
+            const weekStartToggle = document.getElementById('week-start-toggle');
+
+            pageContents.forEach(page => page.classList.add('hidden'));
+            navButtons.forEach(button => button.classList.remove('active-nav-button'));
+
             const activeNavButton = document.getElementById(`nav-${pageId.slice(4).toLowerCase()}`);
             if (activeNavButton) {
                 activeNavButton.classList.add('active-nav-button');
             }
 
-            const controlsContainer = document.getElementById('controls-container');
-            const birthdayPicker = document.getElementById('birthday-picker');
-            
-            calendarContainer.classList.add('hidden');
-            todayPage.classList.add('hidden');
-            helpPage.classList.add('hidden');
-            controlsContainer.classList.add('hidden');
-            birthdayPicker.classList.add('hidden');
-            criticalDayLabel.classList.add('hidden');
-
             if (pageId === 'page1' || pageId === 'page2') {
-                calendarContainer.classList.remove('hidden');
-                controlsContainer.classList.remove('hidden');
-                birthdayPicker.classList.remove('hidden');
-                criticalDayLabel.classList.remove('hidden');
+                document.getElementById('calendar-container').classList.remove('hidden');
+                monthYearSelectors.classList.remove('hidden');
+                weekStartToggle.classList.remove('hidden');
                 renderCalendar();
             } else if (pageId === 'page3') {
-                todayPage.classList.remove('hidden');
-                // Controls are intentionally hidden for the Today page
+                document.getElementById('page3-content').classList.remove('hidden');
+                monthYearSelectors.classList.add('hidden');
+                weekStartToggle.classList.add('hidden');
+                updateTodaySelectorsFromDate();
             } else if (pageId === 'page4') {
-                helpPage.classList.remove('hidden');
-                // Controls are intentionally hidden for the Help page
+                document.getElementById('page4').classList.remove('hidden');
+                monthYearSelectors.classList.add('hidden');
+                weekStartToggle.classList.add('hidden');
             }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Set default birthday to May 22, 1951 (months are 0-indexed, so 4 is May)
-            birthday = new Date(1951, 4, 22);
+            const savedBirthday = localStorage.getItem('savedBirthday');
+            if (savedBirthday) {
+                birthday = new Date(savedBirthday);
+                document.getElementById('birthday-reminder').classList.add('hidden');
+            } else {
+                birthday = new Date(1951, 4, 22); // Default birthday
+                document.getElementById('birthday-reminder').classList.remove('hidden');
+            }
+            
             populateSelectors();
             populateBirthdaySelectors();
+            populateTodaySelectors();
             showPage('page1');
         });
     </script>
