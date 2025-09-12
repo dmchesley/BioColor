@@ -93,6 +93,29 @@
         let currentPageId = 'page1';
         let startWeekOnMonday = false;
         let birthday = new Date(); // Default birthday is today
+        
+        // Biorhythm cycle lengths in days
+        const PHYSICAL_CYCLE = 23;
+        const EMOTIONAL_CYCLE = 28;
+        const INTELLECTUAL_CYCLE = 33;
+        
+        // Helper function to calculate the number of days between two dates
+        function getDaysBetween(date1, date2) {
+            const oneDay = 1000 * 60 * 60 * 24;
+            const diffInTime = date2.getTime() - date1.getTime();
+            return Math.floor(diffInTime / oneDay);
+        }
+
+        // Helper function to calculate biorhythm values
+        function calculateBiorhythms(date) {
+            const daysSinceBirth = getDaysBetween(birthday, date);
+            
+            const physical = Math.sin((2 * Math.PI * daysSinceBirth) / PHYSICAL_CYCLE);
+            const emotional = Math.sin((2 * Math.PI * daysSinceBirth) / EMOTIONAL_CYCLE);
+            const intellectual = Math.sin((2 * Math.PI * daysSinceBirth) / INTELLECTUAL_CYCLE);
+            
+            return { physical, emotional, intellectual };
+        }
 
         // Populates the birthday month, day, and year selectors
         function populateBirthdaySelectors() {
@@ -256,21 +279,94 @@
 
             for (let i = 1; i <= daysInMonth; i++) {
                 const dayCell = document.createElement('div');
+                const dayDate = new Date(year, month, i);
                 
+                // Get the biorhythm values for the day
+                const { physical, emotional, intellectual } = calculateBiorhythms(dayDate);
+                
+                // Common classes for all day cells
                 const classes = [
-                    'w-full', 'rounded', 'p-1', 'min-h-[5rem]', 'bg-red-800', 'shadow-inner', 'shadow-red-900',
-                    'flex', 'items-start', 'justify-start', 'text-sm', 'sm:text-base', 
-                    'hover:bg-red-700', 'transition-colors', 'duration-200'
+                    'w-full', 'rounded', 'px-1', 'min-h-[5rem]', 'shadow-inner',
+                    'relative', 'transition-colors', 'duration-200'
                 ];
 
-                if (isCurrentMonth && i === today.getDate()) {
-                    classes.push('border-2', 'border-white', '!bg-red-700');
+                const dayNumberDiv = document.createElement('div');
+                dayNumberDiv.classList.add('absolute', 'top-1', 'left-1', 'text-sm', 'sm:text-base');
+                dayNumberDiv.textContent = i;
+                
+                if (currentPageId === 'page1') {
+                    // Map emotional to red, physical to green, and intellectual to blue
+                    const r = Math.floor((emotional + 1) / 2 * 255);
+                    const g = Math.floor((physical + 1) / 2 * 255);
+                    const b = Math.floor((intellectual + 1) / 2 * 255);
+                    
+                    dayCell.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+                    
+                    // Calculate perceived luminance to determine text color
+                    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+                    let textColor = 'white';
+                    if (luminance > 0.5) {
+                        textColor = 'black';
+                    }
+                    dayNumberDiv.style.color = textColor;
+                    
+                    // Scale values to 0-100 for the labels
+                    const scaledEmotional = Math.floor((emotional + 1) / 2 * 100);
+                    const scaledPhysical = Math.floor((physical + 1) / 2 * 100);
+                    const scaledIntellectual = Math.floor((intellectual + 1) / 2 * 100);
+
+                    const labelDiv = document.createElement('div');
+                    labelDiv.classList.add('absolute', 'bottom-1', 'left-1', 'right-1', 'text-xs', 'flex', 'justify-between', 'space-x-1');
+                    labelDiv.style.color = textColor;
+                    labelDiv.innerHTML = `<span class="whitespace-nowrap">E:${scaledEmotional}</span><span class="whitespace-nowrap">P:${scaledPhysical}</span><span class="whitespace-nowrap">I:${scaledIntellectual}</span>`;
+                    
+                    dayCell.appendChild(dayNumberDiv);
+                    dayCell.appendChild(labelDiv);
+                    classes.push('border');
+
+                } else if (currentPageId === 'page2') {
+                    dayCell.classList.add('border');
+
+                    // Scale values to 0-100 for the bars
+                    const scaledEmotional = Math.floor((emotional + 1) / 2 * 100);
+                    const scaledPhysical = Math.floor((physical + 1) / 2 * 100);
+                    const scaledIntellectual = Math.floor((intellectual + 1) / 2 * 100);
+
+                    dayCell.appendChild(dayNumberDiv);
+
+                    // Bar chart container
+                    const barContainer = document.createElement('div');
+                    barContainer.classList.add('absolute', 'bottom-0', 'left-0', 'right-0', 'h-full', 'flex', 'items-end', 'p-1', 'space-x-1');
+
+                    // Emotional bar (Red)
+                    const redBar = document.createElement('div');
+                    redBar.classList.add('flex-1', 'bg-red-500', 'rounded-t-sm', 'border-t-2', 'border-white');
+                    redBar.style.height = `${scaledEmotional}%`;
+                    barContainer.appendChild(redBar);
+
+                    // Physical bar (Green)
+                    const greenBar = document.createElement('div');
+                    greenBar.classList.add('flex-1', 'bg-green-500', 'rounded-t-sm', 'border-t-2', 'border-white');
+                    greenBar.style.height = `${scaledPhysical}%`;
+                    barContainer.appendChild(greenBar);
+                    
+                    // Intellectual bar (Blue)
+                    const blueBar = document.createElement('div');
+                    blueBar.classList.add('flex-1', 'bg-blue-500', 'rounded-t-sm', 'border-t-2', 'border-white');
+                    blueBar.style.height = `${scaledIntellectual}%`;
+                    barContainer.appendChild(blueBar);
+
+                    dayCell.appendChild(barContainer);
+
                 } else {
-                    classes.push('border', 'border-red-800');
+                    classes.push('bg-red-800');
+                }
+                
+                if (isCurrentMonth && i === today.getDate()) {
+                    classes.push('border-4', 'border-white');
                 }
 
                 dayCell.classList.add(...classes);
-                dayCell.textContent = i;
                 daysGrid.appendChild(dayCell);
             }
         }
@@ -307,6 +403,8 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            // Set default birthday to May 22, 1951 (months are 0-indexed, so 4 is May)
+            birthday = new Date(1951, 4, 22);
             populateSelectors();
             populateBirthdaySelectors();
             showPage('page1');
