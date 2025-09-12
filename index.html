@@ -65,6 +65,9 @@
             <button id="nav-today" onclick="showPage('page3')" class="nav-button bg-stone-800 hover:bg-stone-700 text-white font-bold py-2 px-4 md:py-3 md:px-6 rounded-md transition-colors duration-200 text-base md:text-lg">
                 Today
             </button>
+            <button id="nav-help" onclick="showPage('page4')" class="nav-button bg-stone-800 hover:bg-stone-700 text-white font-bold py-2 px-4 md:py-3 md:px-6 rounded-md transition-colors duration-200 text-base md:text-lg">
+                Help
+            </button>
             <!-- Label for Critical Days -->
             <div id="critical-day-label" class="flex flex-col items-center mt-4">
                 <div class="biorhythm-crit-marker mb-1"></div>
@@ -90,6 +93,18 @@
                         Your drawing area for Page 3.
                     </p>
                 </div>
+            </div>
+
+            <!-- Page 4 Content (Help) -->
+            <div id="page4" class="page-content hidden flex-col flex-1 p-4 sm:p-6 bg-stone-900 rounded-lg">
+                <h1 class="text-3xl sm:text-4xl font-bold mb-4">What Are Biorhythms?</h1>
+                <p class="text-lg mb-6 leading-relaxed">
+                    Biorhythms are the three cycles that control human performance from birth: a 28-day emotional cycle (Red), a 23-day physical cycle (Green), and a 33-day intellectual cycle (Blue). These cycles create “good” and “bad” days for mood, strength, and mental abilities. Days when a cycle crosses the midpoint (Orange triangle) are "critical." Performance on a critical day may be unreliable.
+                </p>
+                <p class="text-lg mb-6 leading-relaxed">
+                    The **Colors** page shows the color resulting from combining E, P, I as R, G, B values. The **Bars** page shows the values in a bar chart. The **Today** page shows both views of a single day.
+                </p>
+                <p class="text-lg font-bold">Have fun!</p>
             </div>
 
         </div>
@@ -431,6 +446,7 @@
             currentPageId = pageId;
             const calendarContainer = document.getElementById('calendar-container');
             const todayPage = document.getElementById('page3');
+            const helpPage = document.getElementById('page4');
             const criticalDayLabel = document.getElementById('critical-day-label');
             
             const navButtons = document.querySelectorAll('.nav-button');
@@ -444,19 +460,26 @@
 
             const controlsContainer = document.getElementById('controls-container');
             const birthdayPicker = document.getElementById('birthday-picker');
+            
+            calendarContainer.classList.add('hidden');
+            todayPage.classList.add('hidden');
+            helpPage.classList.add('hidden');
+            controlsContainer.classList.add('hidden');
+            birthdayPicker.classList.add('hidden');
+            criticalDayLabel.classList.add('hidden');
+
             if (pageId === 'page1' || pageId === 'page2') {
                 calendarContainer.classList.remove('hidden');
-                todayPage.classList.add('hidden');
                 controlsContainer.classList.remove('hidden');
                 birthdayPicker.classList.remove('hidden');
                 criticalDayLabel.classList.remove('hidden');
                 renderCalendar();
-            } else {
-                calendarContainer.classList.add('hidden');
+            } else if (pageId === 'page3') {
                 todayPage.classList.remove('hidden');
-                controlsContainer.classList.add('hidden');
-                birthdayPicker.classList.add('hidden');
-                criticalDayLabel.classList.add('hidden');
+                // Controls are intentionally hidden for the Today page
+            } else if (pageId === 'page4') {
+                helpPage.classList.remove('hidden');
+                // Controls are intentionally hidden for the Help page
             }
         }
 
