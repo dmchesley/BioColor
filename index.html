@@ -16,6 +16,15 @@
             background-color: #57534e; /* A darker stone color to indicate selection */
             box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.25);
         }
+        /* CSS to create an orange triangle pointing up */
+        .biorhythm-crit-marker {
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 12px solid #f97316; /* Orange color */
+            transition: opacity 0.2s;
+        }
     </style>
 </head>
 <body class="bg-stone-950 flex flex-col min-h-screen text-gray-200">
@@ -56,6 +65,11 @@
             <button id="nav-today" onclick="showPage('page3')" class="nav-button bg-stone-800 hover:bg-stone-700 text-white font-bold py-2 px-4 md:py-3 md:px-6 rounded-md transition-colors duration-200 text-base md:text-lg">
                 Today
             </button>
+            <!-- Label for Critical Days -->
+            <div id="critical-day-label" class="flex flex-col items-center mt-4">
+                <div class="biorhythm-crit-marker mb-1"></div>
+                <span class="text-xs text-stone-400">Critical Day</span>
+            </div>
         </nav>
     
         <div class="w-full flex flex-col rounded-lg flex-1">
@@ -316,13 +330,35 @@
                     const scaledIntellectual = Math.floor((intellectual + 1) / 2 * 100);
 
                     const labelDiv = document.createElement('div');
-                    labelDiv.classList.add('absolute', 'bottom-1', 'left-1', 'right-1', 'text-xs', 'flex', 'justify-between', 'space-x-1');
+                    labelDiv.classList.add('absolute', 'top-1/2', '-translate-y-1/2', 'left-1', 'right-1', 'text-xs', 'flex', 'justify-between', 'space-x-1');
                     labelDiv.style.color = textColor;
                     labelDiv.innerHTML = `<span class="whitespace-nowrap">E:${scaledEmotional}</span><span class="whitespace-nowrap">P:${scaledPhysical}</span><span class="whitespace-nowrap">I:${scaledIntellectual}</span>`;
                     
                     dayCell.appendChild(dayNumberDiv);
                     dayCell.appendChild(labelDiv);
                     classes.push('border');
+
+                    // Add critical day markers
+                    const critMarkerContainer = document.createElement('div');
+                    critMarkerContainer.classList.add('absolute', 'bottom-1', 'left-0', 'right-0', 'flex', 'justify-between', 'px-1');
+                    
+                    const markerE = document.createElement('div');
+                    markerE.classList.add('biorhythm-crit-marker');
+                    markerE.style.opacity = Math.abs(emotional) < 0.1 ? 1 : 0;
+                    critMarkerContainer.appendChild(markerE);
+
+                    const markerP = document.createElement('div');
+                    markerP.classList.add('biorhythm-crit-marker');
+                    markerP.style.opacity = Math.abs(physical) < 0.1 ? 1 : 0;
+                    critMarkerContainer.appendChild(markerP);
+
+                    const markerI = document.createElement('div');
+                    markerI.classList.add('biorhythm-crit-marker');
+                    markerI.style.opacity = Math.abs(intellectual) < 0.1 ? 1 : 0;
+                    critMarkerContainer.appendChild(markerI);
+
+                    dayCell.appendChild(critMarkerContainer);
+
 
                 } else if (currentPageId === 'page2') {
                     dayCell.classList.add('border');
@@ -332,6 +368,7 @@
                     const scaledPhysical = Math.floor((physical + 1) / 2 * 100);
                     const scaledIntellectual = Math.floor((intellectual + 1) / 2 * 100);
 
+                    dayNumberDiv.classList.add('bg-black', 'bg-opacity-50', 'text-white', 'px-1', 'rounded-sm', 'z-10');
                     dayCell.appendChild(dayNumberDiv);
 
                     // Bar chart container
@@ -340,20 +377,38 @@
 
                     // Emotional bar (Red)
                     const redBar = document.createElement('div');
-                    redBar.classList.add('flex-1', 'bg-red-500', 'rounded-t-sm', 'border-t-2', 'border-white');
+                    redBar.classList.add('flex-1', 'bg-red-500', 'rounded-t-sm', 'border-t-2', 'border-white', 'relative');
                     redBar.style.height = `${scaledEmotional}%`;
+                    if (Math.abs(emotional) < 0.1) {
+                        const critMarker = document.createElement('div');
+                        critMarker.classList.add('biorhythm-crit-marker', 'absolute', 'left-1/2', '-translate-x-1/2');
+                        critMarker.style.top = '-18px';
+                        redBar.appendChild(critMarker);
+                    }
                     barContainer.appendChild(redBar);
 
                     // Physical bar (Green)
                     const greenBar = document.createElement('div');
-                    greenBar.classList.add('flex-1', 'bg-green-500', 'rounded-t-sm', 'border-t-2', 'border-white');
+                    greenBar.classList.add('flex-1', 'bg-green-500', 'rounded-t-sm', 'border-t-2', 'border-white', 'relative');
                     greenBar.style.height = `${scaledPhysical}%`;
+                    if (Math.abs(physical) < 0.1) {
+                        const critMarker = document.createElement('div');
+                        critMarker.classList.add('biorhythm-crit-marker', 'absolute', 'left-1/2', '-translate-x-1/2');
+                        critMarker.style.top = '-18px';
+                        greenBar.appendChild(critMarker);
+                    }
                     barContainer.appendChild(greenBar);
                     
                     // Intellectual bar (Blue)
                     const blueBar = document.createElement('div');
-                    blueBar.classList.add('flex-1', 'bg-blue-500', 'rounded-t-sm', 'border-t-2', 'border-white');
+                    blueBar.classList.add('flex-1', 'bg-blue-500', 'rounded-t-sm', 'border-t-2', 'border-white', 'relative');
                     blueBar.style.height = `${scaledIntellectual}%`;
+                    if (Math.abs(intellectual) < 0.1) {
+                        const critMarker = document.createElement('div');
+                        critMarker.classList.add('biorhythm-crit-marker', 'absolute', 'left-1/2', '-translate-x-1/2');
+                        critMarker.style.top = '-18px';
+                        blueBar.appendChild(critMarker);
+                    }
                     barContainer.appendChild(blueBar);
 
                     dayCell.appendChild(barContainer);
@@ -376,6 +431,7 @@
             currentPageId = pageId;
             const calendarContainer = document.getElementById('calendar-container');
             const todayPage = document.getElementById('page3');
+            const criticalDayLabel = document.getElementById('critical-day-label');
             
             const navButtons = document.querySelectorAll('.nav-button');
             navButtons.forEach(button => {
@@ -393,12 +449,14 @@
                 todayPage.classList.add('hidden');
                 controlsContainer.classList.remove('hidden');
                 birthdayPicker.classList.remove('hidden');
+                criticalDayLabel.classList.remove('hidden');
                 renderCalendar();
             } else {
                 calendarContainer.classList.add('hidden');
                 todayPage.classList.remove('hidden');
                 controlsContainer.classList.add('hidden');
                 birthdayPicker.classList.add('hidden');
+                criticalDayLabel.classList.add('hidden');
             }
         }
 
