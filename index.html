@@ -407,11 +407,16 @@
             document.getElementById('today-date-text').textContent = dateString;
         }
 
-        // Toggles between Sunday and Monday week start
-        function toggleWeekStart() {
-            startWeekOnMonday = !startWeekOnMonday;
+        function updateToggleButtonText() {
             const toggleButton = document.getElementById('week-start-toggle');
             toggleButton.textContent = startWeekOnMonday ? 'Begin week on Sunday' : 'Begin week on Monday';
+        }
+
+        // Toggles between Sunday and Monday week start and saves preference to local storage
+        function toggleWeekStart() {
+            startWeekOnMonday = !startWeekOnMonday;
+            localStorage.setItem('startWeekOnMonday', startWeekOnMonday);
+            updateToggleButtonText();
             renderCalendar();
         }
 
@@ -422,8 +427,6 @@
             } else {
                 currentDate.setMonth(currentDate.getMonth() + 1);
             }
-            // Fix: Directly call renderCalendar after changing the date.
-            // The previous code called updateCalendarFromSelects(), which reset the month.
             renderCalendar();
         }
 
@@ -556,7 +559,7 @@
                     dayCell.appendChild(dayNumberDiv);
 
                     const barContainer = document.createElement('div');
-                    barContainer.classList.add('absolute', 'bottom-0', 'left-0', 'right-0', 'h-full', 'flex', 'items-end', 'p-1', 'space-x-1');
+                    barContainer.classList.add('absolute', 'bottom-0', 'left-0', 'right-0', 'h-full', 'flex', 'items-end', 'p-1', 'space-x-4');
 
                     const redBar = document.createElement('div');
                     redBar.classList.add('flex-1', 'bg-red-500', 'rounded-t-sm', 'border-t-2', 'border-white', 'relative');
@@ -775,7 +778,18 @@
                 birthday = new Date(1951, 4, 22); // Default birthday
                 document.getElementById('birthday-reminder').classList.remove('hidden');
             }
+
+            // Load the user's preferred week start from local storage.
+            // A website cannot read the device's native settings.
+            const savedWeekStart = localStorage.getItem('startWeekOnMonday');
+            if (savedWeekStart !== null) {
+                startWeekOnMonday = savedWeekStart === 'true';
+            }
             
+            // Update the button text to reflect the loaded setting
+            updateToggleButtonText();
+
+            // Initialize all selectors and render the initial page
             populateSelectors();
             populateBirthdaySelectors();
             populateTodaySelectors();
