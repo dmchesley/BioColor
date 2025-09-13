@@ -33,6 +33,56 @@
         .biorhythm-crit-marker.white-outlined-marker {
             filter: drop-shadow(0 0 1px white);
         }
+
+        /*
+            New responsive styles for the calendar.
+            On screens narrower than 768px (md: breakpoint in Tailwind),
+            the calendar will switch from a 7-column grid to a single-column
+            layout for better readability and a better fit.
+        */
+        .days-grid-responsive {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 0.25rem;
+        }
+        
+        @media (max-width: 767px) {
+            .weekdays-header {
+                display: none; /* Hide the weekday header on small screens */
+            }
+            .days-grid-responsive {
+                display: flex;
+                flex-direction: column;
+                overflow-y: auto; /* Enable vertical scrolling */
+                -webkit-overflow-scrolling: touch;
+                height: 100%; /* Take up all available height */
+            }
+            .day-cell-responsive {
+                min-height: auto;
+                height: 5rem;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            .day-number-responsive {
+                position: static;
+                font-size: 1.5rem;
+            }
+            .day-labels-responsive {
+                position: static;
+                transform: none;
+                flex-grow: 1;
+                justify-content: flex-end;
+            }
+            .crit-marker-container-responsive {
+                position: static;
+                justify-content: flex-end;
+                padding: 0;
+                margin-left: 1rem;
+            }
+        }
     </style>
 </head>
 <body class="bg-[#0d172a] flex flex-col min-h-screen text-gray-200">
@@ -397,6 +447,10 @@
             // Clear previous content
             weekdaysHeader.innerHTML = '';
             daysGrid.innerHTML = '';
+
+            // Add new responsive classes to the calendar components
+            daysGrid.classList.add('days-grid-responsive');
+            weekdaysHeader.classList.add('days-grid-responsive');
             
             const month = currentDate.getMonth();
             const year = currentDate.getFullYear();
@@ -432,11 +486,12 @@
 
             for (let i = 1; i <= daysInMonth; i++) {
                 const dayCell = document.createElement('div');
+                dayCell.classList.add('day-cell-responsive');
                 const dayDate = new Date(year, month, i);
                 const { physical, emotional, intellectual } = calculateBiorhythms(dayDate);
                 const classes = ['w-full', 'rounded', 'px-1', 'min-h-[5rem]', 'shadow-inner', 'relative', 'transition-colors', 'duration-200', 'cursor-pointer'];
                 const dayNumberDiv = document.createElement('div');
-                dayNumberDiv.classList.add('absolute', 'top-1', 'left-1', 'text-sm', 'sm:text-base');
+                dayNumberDiv.classList.add('absolute', 'top-1', 'left-1', 'text-sm', 'sm:text-base', 'day-number-responsive');
                 dayNumberDiv.textContent = i;
 
                 // Add click event listener to each day cell
@@ -464,7 +519,7 @@
                     const scaledIntellectual = Math.floor((intellectual + 1) / 2 * 100);
 
                     const labelDiv = document.createElement('div');
-                    labelDiv.classList.add('absolute', 'top-1/2', '-translate-y-1/2', 'left-1', 'right-1', 'text-xs', 'flex', 'justify-between', 'space-x-1');
+                    labelDiv.classList.add('absolute', 'top-1/2', '-translate-y-1/2', 'left-1', 'right-1', 'text-xs', 'flex', 'justify-between', 'space-x-1', 'day-labels-responsive');
                     labelDiv.style.color = textColor;
                     labelDiv.innerHTML = `<span class="whitespace-nowrap">E:${scaledEmotional}</span><span class="whitespace-nowrap">P:${scaledPhysical}</span><span class="whitespace-nowrap">I:${scaledIntellectual}</span>`;
                     
@@ -473,7 +528,7 @@
                     classes.push('border');
 
                     const critMarkerContainer = document.createElement('div');
-                    critMarkerContainer.classList.add('absolute', 'bottom-1', 'left-0', 'right-0', 'flex', 'justify-between', 'px-1');
+                    critMarkerContainer.classList.add('absolute', 'bottom-1', 'left-0', 'right-0', 'flex', 'justify-between', 'px-1', 'crit-marker-container-responsive');
                     
                     const markerE = document.createElement('div');
                     markerE.classList.add('biorhythm-crit-marker', 'black-outlined-marker');
@@ -497,7 +552,7 @@
                     const scaledPhysical = Math.floor((physical + 1) / 2 * 100);
                     const scaledIntellectual = Math.floor((intellectual + 1) / 2 * 100);
 
-                    dayNumberDiv.classList.add('bg-black', 'bg-opacity-50', 'text-white', 'px-1', 'rounded-sm', 'z-10');
+                    dayNumberDiv.classList.add('bg-black', 'bg-opacity-50', 'text-white', 'px-1', 'rounded-sm', 'z-10', 'day-number-responsive');
                     dayCell.appendChild(dayNumberDiv);
 
                     const barContainer = document.createElement('div');
