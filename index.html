@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Biorhythm Calculator</title>
+    <title>Biorhythm Calendar</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
     <style>
@@ -34,7 +34,12 @@
             filter: drop-shadow(0 0 1px white);
         }
 
-        /* Responsive styles for the calendar */
+        /*
+            New responsive styles for the calendar.
+            On screens narrower than 768px (md: breakpoint in Tailwind),
+            the calendar will switch from a 7-column grid to a single-column
+            layout for better readability and a better fit.
+        */
         .days-grid-responsive {
             display: grid;
             grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -48,9 +53,9 @@
             .days-grid-responsive {
                 display: flex;
                 flex-direction: column;
-                overflow-y: auto;
+                overflow-y: auto; /* Enable vertical scrolling */
                 -webkit-overflow-scrolling: touch;
-                height: 100%;
+                height: 100%; /* Take up all available height */
             }
             .day-cell-responsive {
                 min-height: auto;
@@ -87,19 +92,27 @@
         
         <!-- Birthday Picker -->
         <div id="birthday-picker-container" class="flex flex-col items-center space-y-2 text-lg md:text-xl">
-            <div id="current-subject-display" class="font-bold text-2xl mb-2"></div>
+            <div class="flex items-center space-x-2">
+                <label for="bday-month-select">Birthday:</label>
+                <select id="bday-month-select" class="bg-[#2a4365] text-white rounded-md p-1 md:p-2 text-lg md:text-xl" onchange="updateBirthday()"></select>
+                <select id="bday-day-select" class="bg-[#2a4365] text-white rounded-md p-1 md:p-2 text-lg md:text-xl" onchange="updateBirthday()"></select>
+                <select id="bday-year-select" class="bg-[#2a4365] text-white rounded-md p-1 md:p-2 text-lg md:text-xl" onchange="updateBirthday()"></select>
+            </div>
+            <p id="birthday-reminder" class="text-sm text-yellow-400 hidden">
+                This is a default birthday. Please select your own!
+            </p>
         </div>
 
         <!-- Month/Year selectors for Colors/Bars page -->
-        <div id="month-year-selectors" class="flex items-center space-x-2 hidden">
-            <button id="prev-month-btn" class="bg-[#2a4365] hover:bg-[#345388] text-white font-bold py-1 px-3 md:py-2 md:px-4 rounded-full text-base md:text-xl">&lt;</button>
-            <select id="month-select" class="bg-[#2a4365] text-white rounded-md p-1 md:p-2 text-base md:text-xl"></select>
-            <select id="year-select" class="bg-[#2a4365] text-white rounded-md p-1 md:p-2 text-base md:text-xl"></select>
-            <button id="next-month-btn" class="bg-[#2a4365] hover:bg-[#345388] text-white font-bold py-1 px-3 md:py-2 md:px-4 rounded-full text-base md:text-xl">&gt;</button>
+        <div id="month-year-selectors" class="flex items-center space-x-2">
+            <button class="prev-month-btn bg-[#2a4365] hover:bg-[#345388] text-white font-bold py-1 px-3 md:py-2 md:px-4 rounded-full text-base md:text-xl" onclick="changeMonth('prev')">&lt;</button>
+            <select id="month-select" class="bg-[#2a4365] text-white rounded-md p-1 md:p-2 text-base md:text-xl" onchange="updateCalendarFromSelects()"></select>
+            <select id="year-select" class="bg-[#2a4365] text-white rounded-md p-1 md:p-2 text-base md:text-xl" onchange="updateCalendarFromSelects()"></select>
+            <button class="next-month-btn bg-[#2a4365] hover:bg-[#345388] text-white font-bold py-1 px-3 md:py-2 md:px-4 rounded-full text-base md:text-xl" onclick="changeMonth('next')">&gt;</button>
         </div>
 
         <!-- Week Start Toggle for Colors/Bars page -->
-        <button id="week-start-toggle" class="bg-[#2a4365] hover:bg-[#345388] text-white font-bold py-1 px-3 md:py-2 md:px-4 rounded-md transition-colors duration-200 text-base md:text-lg hidden">
+        <button id="week-start-toggle" onclick="toggleWeekStart()" class="bg-[#2a4365] hover:bg-[#345388] text-white font-bold py-1 px-3 md:py-2 md:px-4 rounded-md transition-colors duration-200 text-base md:text-lg">
             Begin week on Monday
         </button>
     </div>
@@ -108,19 +121,16 @@
     <main class="flex-1 flex flex-row items-start px-4 sm:px-8 lg:px-12 pb-24">
         <!-- Navigation Menu to switch between pages -->
         <nav class="flex flex-col space-y-4 pr-4 pt-16">
-            <button id="nav-colors" class="nav-button bg-[#2a4365] hover:bg-[#345388] text-white font-bold py-2 px-4 md:py-3 md:px-6 rounded-md transition-colors duration-200 text-base md:text-lg">
+            <button id="nav-colors" onclick="showPage('page1')" class="nav-button bg-[#2a4365] hover:bg-[#345388] text-white font-bold py-2 px-4 md:py-3 md:px-6 rounded-md transition-colors duration-200 text-base md:text-lg">
                 Colors
             </button>
-            <button id="nav-bars" class="nav-button bg-[#2a4365] hover:bg-[#345388] text-white font-bold py-2 px-4 md:py-3 md:px-6 rounded-md transition-colors duration-200 text-base md:text-lg">
+            <button id="nav-bars" onclick="showPage('page2')" class="nav-button bg-[#2a4365] hover:bg-[#345388] text-white font-bold py-2 px-4 md:py-3 md:px-6 rounded-md transition-colors duration-200 text-base md:text-lg">
                 Bars
             </button>
-            <button id="nav-today" class="nav-button bg-[#2a4365] hover:bg-[#345388] text-white font-bold py-2 px-4 md:py-3 md:px-6 rounded-md transition-colors duration-200 text-base md:text-lg">
+            <button id="nav-today" onclick="todayDate = new Date(); showPage('page3')" class="nav-button bg-[#2a4365] hover:bg-[#345388] text-white font-bold py-2 px-4 md:py-3 md:px-6 rounded-md transition-colors duration-200 text-base md:text-lg">
                 Today
             </button>
-            <button id="nav-friends" class="nav-button bg-[#2a4365] hover:bg-[#345388] text-white font-bold py-2 px-4 md:py-3 md:px-6 rounded-md transition-colors duration-200 text-base md:text-lg">
-                Friends
-            </button>
-            <button id="nav-help" class="nav-button bg-[#2a4365] hover:bg-[#345388] text-white font-bold py-2 px-4 md:py-3 md:px-6 rounded-md transition-colors duration-200 text-base md:text-lg">
+            <button id="nav-help" onclick="showPage('page4')" class="nav-button bg-[#2a4365] hover:bg-[#345388] text-white font-bold py-2 px-4 md:py-3 md:px-6 rounded-md transition-colors duration-200 text-base md:text-lg">
                 Help
             </button>
             <!-- Label for Critical Days -->
@@ -143,46 +153,25 @@
                 <div class="flex flex-col items-center mb-6">
                     <label class="text-lg md:text-xl font-bold mb-2">Biorhythm for:</label>
                     <div id="today-date-picker" class="flex items-center space-x-2 justify-center">
-                        <button id="prev-day-btn" class="bg-[#2a4365] hover:bg-[#345388] text-white font-bold py-1 px-3 md:py-2 md:px-4 rounded-full text-base md:text-xl">&lt;</button>
-                        <select id="today-month-select" class="bg-[#2a4365] text-white rounded-md p-1 md:p-2 text-lg md:text-xl"></select>
-                        <select id="today-day-select" class="bg-[#2a4365] text-white rounded-md p-1 md:p-2 text-lg md:text-xl"></select>
-                        <select id="today-year-select" class="bg-[#2a4365] text-white rounded-md p-1 md:p-2 text-lg md:text-xl"></select>
-                        <button id="next-day-btn" class="bg-[#2a4365] hover:bg-[#345388] text-white font-bold py-1 px-3 md:py-2 md:px-4 rounded-full text-base md:text-xl">&gt;</button>
+                        <button class="prev-day-btn bg-[#2a4365] hover:bg-[#345388] text-white font-bold py-1 px-3 md:py-2 md:px-4 rounded-full text-base md:text-xl" onclick="changeDay('prev')">&lt;</button>
+                        <select id="today-month-select" class="bg-[#2a4365] text-white rounded-md p-1 md:p-2 text-lg md:text-xl" onchange="updateTodayFromSelects()"></select>
+                        <select id="today-day-select" class="bg-[#2a4365] text-white rounded-md p-1 md:p-2 text-lg md:text-xl" onchange="updateTodayFromSelects()"></select>
+                        <select id="today-year-select" class="bg-[#2a4365] text-white rounded-md p-1 md:p-2 text-lg md:text-xl" onchange="updateTodayFromSelects()"></select>
+                        <button class="next-day-btn bg-[#2a4365] hover:bg-[#345388] text-white font-bold py-1 px-3 md:py-2 md:px-4 rounded-full text-base md:text-xl" onclick="changeDay('next')">&gt;</button>
                     </div>
                     <span id="today-date-text" class="text-xl md:text-2xl font-bold mt-2"></span>
                 </div>
                 <div id="today-display-grid" class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4 flex-1"></div>
             </div>
-
-            <!-- Page 5 Content (Friends) -->
-            <div id="page5-content" class="page-content hidden w-full flex-col flex-1 p-4 sm:p-6 bg-[#132238] rounded-lg">
-                <h1 class="text-3xl sm:text-4xl font-bold mb-4">Your Friends</h1>
-                <p id="loading-friends" class="text-center text-lg mt-4">Loading friends data...</p>
-                <div id="friends-list" class="space-y-2 mb-6"></div>
-                <form id="add-friend-form" class="mt-4 flex flex-col space-y-2 md:space-y-0 md:flex-row md:space-x-4">
-                    <input type="text" id="friend-name" placeholder="Friend's Name" required class="flex-1 bg-[#2a4365] text-white rounded-md p-2">
-                    <div class="flex-1 flex space-x-2">
-                        <select id="friend-month-select" class="flex-1 bg-[#2a4365] text-white rounded-md p-2"></select>
-                        <select id="friend-day-select" class="flex-1 bg-[#2a4365] text-white rounded-md p-2"></select>
-                        <select id="friend-year-select" class="flex-1 bg-[#2a4365] text-white rounded-md p-2"></select>
-                    </div>
-                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">
-                        Add Friend
-                    </button>
-                    <button type="button" id="cancel-edit-btn" class="hidden bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">
-                        Cancel Edit
-                    </button>
-                </form>
-            </div>
             
             <!-- Page 4 Content (Help) -->
-            <div id="page4-content" class="page-content hidden flex-col flex-1 p-4 sm:p-6 bg-[#132238] rounded-lg">
+            <div id="page4" class="page-content hidden flex-col flex-1 p-4 sm:p-6 bg-[#132238] rounded-lg">
                 <h1 class="text-3xl sm:text-4xl font-bold mb-4">What Are Biorhythms?</h1>
                 <p class="text-lg mb-6 leading-relaxed">
                     Biorhythms are the three cycles that control human performance from birth: a 28-day emotional cycle (Red), a 23-day physical cycle (Green), and a 33-day intellectual cycle (Blue). These cycles create “good” and “bad” days for mood, strength, and mental abilities. Days when a cycle crosses the midpoint (Orange triangle) are "critical." Performance on a critical day may be unreliable.
                 </p>
                 <p class="text-lg mb-6 leading-relaxed">
-                    The **Colors** page shows the color resulting from combining E, P, I as R, G, B values. The **Bars** page shows the values in a bar chart. The **Today** page shows both views of a single day. The **Friends** page lets you save birthdays for easy access.
+                    The **Colors** page shows the color resulting from combining E, P, I as R, G, B values. The **Bars** page shows the values in a bar chart. The **Today** page shows both views of a single day.
                 </p>
                 <p class="text-lg font-bold">Have fun!</p>
             </div>
@@ -195,85 +184,29 @@
         <p>Your Ad Space Here</p>
     </div>
 
-    <script type="module">
-        // Firebase SDK imports
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, query, addDoc, updateDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Global variables provided by the Canvas environment
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+    <script>
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const weekdayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        let currentDate = new Date();
+        let todayDate = new Date(); // Separate date for the 'Today' page
+        let currentPageId = 'page1';
+        let startWeekOnMonday = false;
+        let birthday = new Date(); // Default birthday is today
         
         // Biorhythm cycle lengths in days
         const PHYSICAL_CYCLE = 23;
         const EMOTIONAL_CYCLE = 28;
         const INTELLECTUAL_CYCLE = 33;
-
-        // Global application state
-        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        const weekdayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-        let currentDate = new Date();
-        let todayDate = new Date();
-        let currentPageId = 'page1';
-        let startWeekOnMonday = false;
-        let currentBirthday = new Date(1951, 4, 22); // Default birthday
-        let currentBirthdayName = "Me";
-        let isAuthReady = false;
-        let friends = [];
-        let selectedFriendId = null;
-
-        let db, auth;
-        let friendsRef;
         
-        // Asynchronous function to initialize Firebase and handle authentication
-        const initializeFirebase = async () => {
-            try {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-                // Set up auth state listener
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        const userId = user.uid;
-                        console.log("Authenticated with user ID:", userId);
-                        friendsRef = collection(db, `artifacts/${appId}/users/${userId}/friends`);
-                        isAuthReady = true;
-                        
-                        // Listen for real-time updates to the friends collection
-                        onSnapshot(friendsRef, (snapshot) => {
-                            friends = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                            renderFriendsList();
-                            console.log("Friends list updated in real-time.");
-                        }, (error) => {
-                            console.error("Error listening to friends collection:", error);
-                        });
-                    } else {
-                        console.log("Signed out.");
-                        isAuthReady = false;
-                    }
-                });
-            } catch (error) {
-                console.error("Error initializing Firebase:", error);
-            }
-        };
-
-        // --- Biorhythm Calculation Functions ---
-        const getDaysBetween = (date1, date2) => {
+        // Helper function to calculate the number of days between two dates
+        function getDaysBetween(date1, date2) {
             const oneDay = 1000 * 60 * 60 * 24;
             const diffInTime = date2.getTime() - date1.getTime();
             return Math.floor(diffInTime / oneDay);
-        };
+        }
 
-        const calculateBiorhythms = (date, birthday) => {
+        // Helper function to calculate biorhythm values
+        function calculateBiorhythms(date) {
             const daysSinceBirth = getDaysBetween(birthday, date);
             
             const physical = Math.sin((2 * Math.PI * daysSinceBirth) / PHYSICAL_CYCLE);
@@ -281,67 +214,244 @@
             const intellectual = Math.sin((2 * Math.PI * daysSinceBirth) / INTELLECTUAL_CYCLE);
             
             return { physical, emotional, intellectual };
-        };
+        }
 
-        // --- Firestore Functions ---
-        const addFriend = async (name, birthday) => {
-            if (!name || !birthday) return;
-            try {
-                await addDoc(friendsRef, {
-                    name,
-                    birthday: birthday.toISOString(),
-                });
-                console.log("Friend added successfully!");
-            } catch (e) {
-                console.error("Error adding friend: ", e);
-            }
-        };
+        // Populates the birthday month, day, and year selectors
+        function populateBirthdaySelectors() {
+            const bdayMonthSelect = document.getElementById('bday-month-select');
+            const bdayDaySelect = document.getElementById('bday-day-select');
+            const bdayYearSelect = document.getElementById('bday-year-select');
 
-        const updateFriend = async (id, name, birthday) => {
-            if (!id || !name || !birthday) return;
-            try {
-                const friendDoc = doc(db, friendsRef.path, id);
-                await updateDoc(friendDoc, {
-                    name,
-                    birthday: birthday.toISOString(),
-                });
-                console.log("Friend updated successfully!");
-            } catch (e) {
-                console.error("Error updating friend: ", e);
-            }
-        };
+            // Populate months
+            monthNames.forEach((month, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = month;
+                bdayMonthSelect.appendChild(option);
+            });
 
-        const deleteFriend = async (id) => {
-            if (!id) return;
-            try {
-                const friendDoc = doc(db, friendsRef.path, id);
-                await deleteDoc(friendDoc);
-                console.log("Friend deleted successfully!");
-            } catch (e) {
-                console.error("Error deleting friend: ", e);
+            // Populate years (e.g., from 1900 to current year)
+            const currentYear = new Date().getFullYear();
+            for (let i = currentYear; i >= 1900; i--) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                bdayYearSelect.appendChild(option);
             }
-        };
-    
-        // --- UI Rendering Functions ---
-        const updateCurrentSubjectDisplay = () => {
-            const subject = currentBirthdayName === "Me" ? "Your" : `${currentBirthdayName}'s`;
-            document.getElementById('current-subject-display').textContent = `${subject} Biorhythms`;
-        };
-        
-        const updateToggleButtonText = () => {
+
+            // Set initial values
+            bdayMonthSelect.value = birthday.getMonth();
+            bdayYearSelect.value = birthday.getFullYear();
+            updateBirthdayDays();
+        }
+
+        // Updates the day selector for birthday based on the selected month and year
+        function updateBirthdayDays() {
+            const bdayMonthSelect = document.getElementById('bday-month-select');
+            const bdayDaySelect = document.getElementById('bday-day-select');
+            const bdayYearSelect = document.getElementById('bday-year-select');
+            
+            const selectedMonth = parseInt(bdayMonthSelect.value);
+            const selectedYear = parseInt(bdayYearSelect.value);
+            const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
+
+            bdayDaySelect.innerHTML = '';
+            for (let i = 1; i <= daysInMonth; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                bdayDaySelect.appendChild(option);
+            }
+
+            // Retain the current day if possible, otherwise default to 1
+            const currentDay = birthday.getDate();
+            if (currentDay <= daysInMonth) {
+                bdayDaySelect.value = currentDay;
+            } else {
+                bdayDaySelect.value = 1;
+            }
+            updateBirthday();
+        }
+
+        // Updates the global birthday variable and re-renders the calendar
+        function updateBirthday() {
+            const bdayMonth = document.getElementById('bday-month-select').value;
+            const bdayDay = document.getElementById('bday-day-select').value;
+            const bdayYear = document.getElementById('bday-year-select').value;
+            
+            birthday = new Date(bdayYear, bdayMonth, bdayDay);
+            // Save the new birthday to local storage
+            localStorage.setItem('savedBirthday', birthday.toISOString());
+            document.getElementById('birthday-reminder').classList.add('hidden');
+            
+            if (currentPageId === 'page1' || currentPageId === 'page2') {
+                renderCalendar();
+            } else if (currentPageId === 'page3') {
+                renderTodayPage();
+            }
+        }
+
+        // Populates the calendar month and year dropdowns
+        function populateSelectors() {
+            const monthSelect = document.getElementById('month-select');
+            const yearSelect = document.getElementById('year-select');
+
+            monthSelect.innerHTML = '';
+            monthNames.forEach((month, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = month;
+                monthSelect.appendChild(option);
+            });
+
+            const currentYear = new Date().getFullYear();
+            yearSelect.innerHTML = '';
+            for (let i = currentYear - 50; i <= currentYear + 50; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                yearSelect.appendChild(option);
+            }
+        }
+
+        // Populates the "Today" page date selectors
+        function populateTodaySelectors() {
+            const monthSelect = document.getElementById('today-month-select');
+            const daySelect = document.getElementById('today-day-select');
+            const yearSelect = document.getElementById('today-year-select');
+
+            monthSelect.innerHTML = '';
+            monthNames.forEach((month, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = month;
+                monthSelect.appendChild(option);
+            });
+
+            const currentYear = new Date().getFullYear();
+            yearSelect.innerHTML = '';
+            for (let i = currentYear - 50; i <= currentYear + 50; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                yearSelect.appendChild(option);
+            }
+
+            updateTodayDays();
+        }
+
+        // Updates the day selector for the "Today" page
+        function updateTodayDays() {
+            const monthSelect = document.getElementById('today-month-select');
+            const daySelect = document.getElementById('today-day-select');
+            const yearSelect = document.getElementById('today-year-select');
+            
+            const selectedMonth = parseInt(monthSelect.value);
+            const selectedYear = parseInt(yearSelect.value);
+            const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
+
+            daySelect.innerHTML = '';
+            for (let i = 1; i <= daysInMonth; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                daySelect.appendChild(option);
+            }
+
+            const currentDay = todayDate.getDate();
+            if (currentDay <= daysInMonth) {
+                daySelect.value = currentDay;
+            } else {
+                daySelect.value = 1;
+            }
+        }
+
+        // Handles changing the day with arrows on the "Today" page
+        function changeDay(direction) {
+            if (direction === 'prev') {
+                todayDate.setDate(todayDate.getDate() - 1);
+            } else {
+                todayDate.setDate(todayDate.getDate() + 1);
+            }
+            updateTodaySelectorsFromDate();
+        }
+
+        // Updates the "Today" page selectors and text to match the todayDate
+        function updateTodaySelectorsFromDate() {
+            document.getElementById('today-month-select').value = todayDate.getMonth();
+            document.getElementById('today-day-select').value = todayDate.getDate();
+            document.getElementById('today-year-select').value = todayDate.getFullYear();
+            updateTodayDateText();
+            renderTodayPage();
+        }
+
+        // Handles changing the date on the "Today" page selectors
+        function updateTodayFromSelects() {
+            const month = document.getElementById('today-month-select').value;
+            const day = document.getElementById('today-day-select').value;
+            const year = document.getElementById('today-year-select').value;
+            todayDate.setMonth(month);
+            todayDate.setFullYear(year);
+            todayDate.setDate(day);
+            updateTodayDateText();
+            renderTodayPage();
+        }
+
+        // Updates the text display with the full formatted date
+        function updateTodayDateText() {
+            const dayOfWeek = weekdayNames[todayDate.getDay()];
+            const month = monthNames[todayDate.getMonth()];
+            const day = todayDate.getDate();
+            const year = todayDate.getFullYear();
+            const dateString = `${dayOfWeek}, ${month} ${day}, ${year}`;
+            document.getElementById('today-date-text').textContent = dateString;
+        }
+
+        function updateToggleButtonText() {
             const toggleButton = document.getElementById('week-start-toggle');
             toggleButton.textContent = startWeekOnMonday ? 'Begin week on Sunday' : 'Begin week on Monday';
-        };
+        }
 
-        const renderCalendar = () => {
+        // Toggles between Sunday and Monday week start and saves preference to local storage
+        function toggleWeekStart() {
+            startWeekOnMonday = !startWeekOnMonday;
+            localStorage.setItem('startWeekOnMonday', startWeekOnMonday);
+            updateToggleButtonText();
+            renderCalendar();
+        }
+
+        // Handles changing the month with arrows
+        function changeMonth(direction) {
+            if (direction === 'prev') {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+            } else {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+            }
+            renderCalendar();
+        }
+
+        // Handles changing the month and year with selectors
+        function updateCalendarFromSelects() {
+            const month = document.getElementById('month-select').value;
+            const year = document.getElementById('year-select').value;
+            currentDate.setMonth(month);
+            currentDate.setFullYear(year);
+            renderCalendar();
+        }
+
+        // Renders the calendar for the Colors and Bars pages
+        function renderCalendar() {
             const container = document.getElementById('calendar-container');
             if (!container) return;
             
             const weekdaysHeader = container.querySelector('.weekdays-header');
             const daysGrid = container.querySelector('.days-grid');
+
+            // Clear previous content
             weekdaysHeader.innerHTML = '';
             daysGrid.innerHTML = '';
 
+            // Add new responsive classes to the calendar components
             daysGrid.classList.add('days-grid-responsive');
             weekdaysHeader.classList.add('days-grid-responsive');
             
@@ -381,12 +491,13 @@
                 const dayCell = document.createElement('div');
                 dayCell.classList.add('day-cell-responsive');
                 const dayDate = new Date(year, month, i);
-                const { physical, emotional, intellectual } = calculateBiorhythms(dayDate, currentBirthday);
+                const { physical, emotional, intellectual } = calculateBiorhythms(dayDate);
                 const classes = ['w-full', 'rounded', 'px-1', 'min-h-[5rem]', 'shadow-inner', 'relative', 'transition-colors', 'duration-200', 'cursor-pointer'];
                 const dayNumberDiv = document.createElement('div');
                 dayNumberDiv.classList.add('absolute', 'top-1', 'left-1', 'text-sm', 'sm:text-base', 'day-number-responsive');
                 dayNumberDiv.textContent = i;
-                
+
+                // Add click event listener to each day cell
                 dayCell.addEventListener('click', () => {
                     todayDate = dayDate;
                     showPage('page3');
@@ -492,13 +603,14 @@
                 dayCell.classList.add(...classes);
                 daysGrid.appendChild(dayCell);
             }
-        };
+        }
 
-        const renderTodayPage = () => {
+        // Renders the single day view for the "Today" page
+        function renderTodayPage() {
             const displayGrid = document.getElementById('today-display-grid');
             displayGrid.innerHTML = '';
             
-            const { physical, emotional, intellectual } = calculateBiorhythms(todayDate, currentBirthday);
+            const { physical, emotional, intellectual } = calculateBiorhythms(todayDate);
 
             // --- Colors View ---
             const colorsDayCell = document.createElement('div');
@@ -515,6 +627,7 @@
             const critLabelContainer = document.createElement('div');
             critLabelContainer.classList.add('absolute', 'top-1/2', 'left-1/2', '-translate-x-1/2', '-translate-y-1/2', 'flex', 'flex-col', 'items-center', 'space-y-1', 'z-20');
             
+            // Increased font size of labels
             const labelClasses = ['text-xl', 'sm:text-2xl', 'font-bold', 'text-center'];
 
             if (Math.abs(emotional) < 0.1) {
@@ -620,105 +733,16 @@
 
             barsDayCell.appendChild(barContainer);
             displayGrid.appendChild(barsDayCell);
-        };
-        
-        // Renders the list of friends from the Firestore data
-        const renderFriendsList = () => {
-            const friendsListContainer = document.getElementById('friends-list');
-            const loadingIndicator = document.getElementById('loading-friends');
-            
-            if (loadingIndicator) {
-                loadingIndicator.classList.add('hidden');
-            }
+        }
 
-            friendsListContainer.innerHTML = '';
-            
-            if (friends.length === 0) {
-                friendsListContainer.innerHTML = '<p class="text-center text-gray-400">No friends added yet. Use the form below to add one!</p>';
-            }
-
-            friends.forEach(friend => {
-                const friendItem = document.createElement('div');
-                const friendBirthday = new Date(friend.birthday);
-                friendItem.classList.add('flex', 'items-center', 'justify-between', 'bg-[#2a4365]', 'rounded-md', 'p-3', 'cursor-pointer', 'hover:bg-[#345388]', 'transition-colors', 'duration-200');
-                friendItem.innerHTML = `
-                    <span class="text-lg font-semibold">${friend.name}</span>
-                    <span class="text-sm text-gray-300">
-                        (${monthNames[friendBirthday.getMonth()]} ${friendBirthday.getDate()}, ${friendBirthday.getFullYear()})
-                    </span>
-                    <div>
-                        <button class="edit-btn text-yellow-400 hover:text-yellow-300 transition-colors duration-200 ml-2" data-id="${friend.id}">Edit</button>
-                        <button class="delete-btn text-red-400 hover:text-red-300 transition-colors duration-200 ml-2" data-id="${friend.id}">Delete</button>
-                    </div>
-                `;
-                friendItem.addEventListener('click', (e) => {
-                    if (e.target.tagName !== 'BUTTON') {
-                        selectFriend(friend.id);
-                    }
-                });
-
-                friendsListContainer.appendChild(friendItem);
-            });
-
-            // Attach event listeners to new buttons
-            document.querySelectorAll('.edit-btn').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const friendId = e.target.dataset.id;
-                    const friendToEdit = friends.find(f => f.id === friendId);
-                    if (friendToEdit) {
-                        const friendBirthday = new Date(friendToEdit.birthday);
-                        document.getElementById('friend-name').value = friendToEdit.name;
-                        document.getElementById('friend-month-select').value = friendBirthday.getMonth();
-                        updateFriendDays(friendBirthday.getMonth(), friendBirthday.getFullYear(), friendBirthday.getDate());
-                        document.getElementById('friend-year-select').value = friendBirthday.getFullYear();
-                        document.getElementById('add-friend-form').dataset.editId = friendToEdit.id;
-                        document.getElementById('add-friend-form').querySelector('button[type="submit"]').textContent = 'Update Friend';
-                        document.getElementById('cancel-edit-btn').classList.remove('hidden');
-                    }
-                });
-            });
-
-            document.querySelectorAll('.delete-btn').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const friendId = e.target.dataset.id;
-                    deleteFriend(friendId);
-                });
-            });
-        };
-
-        const selectFriend = (friendId) => {
-            selectedFriendId = friendId;
-            const friend = friends.find(f => f.id === friendId);
-            if (friend) {
-                currentBirthday = new Date(friend.birthday);
-                currentBirthdayName = friend.name;
-            } else {
-                currentBirthday = new Date(1951, 4, 22);
-                currentBirthdayName = "Me";
-            }
-            updateCurrentSubjectDisplay();
-            showPage('page1');
-        };
-
-        const resetFriendForm = () => {
-            const form = document.getElementById('add-friend-form');
-            form.reset();
-            delete form.dataset.editId;
-            form.querySelector('button[type="submit"]').textContent = 'Add Friend';
-            document.getElementById('cancel-edit-btn').classList.add('hidden');
-            populateFriendSelectors(currentBirthday);
-        };
-
-        // --- Main Page Logic ---
-        const showPage = (pageId) => {
+        // JavaScript to handle page visibility
+        function showPage(pageId) {
             currentPageId = pageId;
             const pageContents = document.querySelectorAll('.page-content');
             const navButtons = document.querySelectorAll('.nav-button');
+            const controlsContainer = document.getElementById('controls-container');
             const monthYearSelectors = document.getElementById('month-year-selectors');
             const weekStartToggle = document.getElementById('week-start-toggle');
-            const criticalDayLabel = document.getElementById('critical-day-label');
 
             pageContents.forEach(page => page.classList.add('hidden'));
             navButtons.forEach(button => button.classList.remove('active-nav-button'));
@@ -728,282 +752,48 @@
                 activeNavButton.classList.add('active-nav-button');
             }
 
-            // Show/hide controls based on the page
-            monthYearSelectors.classList.add('hidden');
-            weekStartToggle.classList.add('hidden');
-            criticalDayLabel.classList.add('hidden');
-            
             if (pageId === 'page1' || pageId === 'page2') {
                 document.getElementById('calendar-container').classList.remove('hidden');
                 monthYearSelectors.classList.remove('hidden');
                 weekStartToggle.classList.remove('hidden');
-                criticalDayLabel.classList.remove('hidden');
                 renderCalendar();
             } else if (pageId === 'page3') {
                 document.getElementById('page3-content').classList.remove('hidden');
-                criticalDayLabel.classList.remove('hidden');
+                monthYearSelectors.classList.add('hidden');
+                weekStartToggle.classList.add('hidden');
                 updateTodaySelectorsFromDate();
             } else if (pageId === 'page4') {
-                document.getElementById('page4-content').classList.remove('hidden');
-            } else if (pageId === 'page5') {
-                document.getElementById('page5-content').classList.remove('hidden');
-                resetFriendForm();
+                document.getElementById('page4').classList.remove('hidden');
+                monthYearSelectors.classList.add('hidden');
+                weekStartToggle.classList.add('hidden');
             }
-        };
-        
-        // Handles changing the month with arrows
-        const changeMonth = (direction) => {
-            if (direction === 'prev') {
-                currentDate.setMonth(currentDate.getMonth() - 1);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedBirthday = localStorage.getItem('savedBirthday');
+            if (savedBirthday) {
+                birthday = new Date(savedBirthday);
+                document.getElementById('birthday-reminder').classList.add('hidden');
             } else {
-                currentDate.setMonth(currentDate.getMonth() + 1);
+                birthday = new Date(1951, 4, 22); // Default birthday
+                document.getElementById('birthday-reminder').classList.remove('hidden');
             }
-            renderCalendar();
-        };
 
-        // Handles changing the month and year with selectors
-        const updateCalendarFromSelects = () => {
-            const month = document.getElementById('month-select').value;
-            const year = document.getElementById('year-select').value;
-            currentDate.setMonth(month);
-            currentDate.setFullYear(year);
-            renderCalendar();
-        };
-
-        // Handles changing the day with arrows on the "Today" page
-        const changeDay = (direction) => {
-            if (direction === 'prev') {
-                todayDate.setDate(todayDate.getDate() - 1);
-            } else {
-                todayDate.setDate(todayDate.getDate() + 1);
-            }
-            updateTodaySelectorsFromDate();
-        };
-
-        // Updates the "Today" page selectors and text to match the todayDate
-        const updateTodaySelectorsFromDate = () => {
-            document.getElementById('today-month-select').value = todayDate.getMonth();
-            document.getElementById('today-day-select').value = todayDate.getDate();
-            document.getElementById('today-year-select').value = todayDate.getFullYear();
-            updateTodayDateText();
-            renderTodayPage();
-        };
-
-        // Handles changing the date on the "Today" page selectors
-        const updateTodayFromSelects = () => {
-            const month = document.getElementById('today-month-select').value;
-            const day = document.getElementById('today-day-select').value;
-            const year = document.getElementById('today-year-select').value;
-            todayDate.setMonth(month);
-            todayDate.setFullYear(year);
-            todayDate.setDate(day);
-            updateTodayDateText();
-            renderTodayPage();
-        };
-
-        // Updates the text display with the full formatted date
-        const updateTodayDateText = () => {
-            const dayOfWeek = weekdayNames[todayDate.getDay()];
-            const month = monthNames[todayDate.getMonth()];
-            const day = todayDate.getDate();
-            const year = todayDate.getFullYear();
-            const dateString = `${dayOfWeek}, ${month} ${day}, ${year}`;
-            document.getElementById('today-date-text').textContent = dateString;
-        };
-
-        const toggleWeekStart = () => {
-            startWeekOnMonday = !startWeekOnMonday;
-            localStorage.setItem('startWeekOnMonday', startWeekOnMonday);
-            updateToggleButtonText();
-            renderCalendar();
-        };
-
-        const populateSelectors = () => {
-            const monthSelect = document.getElementById('month-select');
-            const yearSelect = document.getElementById('year-select');
-            monthSelect.innerHTML = '';
-            monthNames.forEach((month, index) => {
-                const option = document.createElement('option');
-                option.value = index;
-                option.textContent = month;
-                monthSelect.appendChild(option);
-            });
-            const currentYear = new Date().getFullYear();
-            yearSelect.innerHTML = '';
-            for (let i = currentYear - 50; i <= currentYear + 50; i++) {
-                const option = document.createElement('option');
-                option.value = i;
-                option.textContent = i;
-                yearSelect.appendChild(option);
-            }
-        };
-
-        const populateTodaySelectors = () => {
-            const monthSelect = document.getElementById('today-month-select');
-            const daySelect = document.getElementById('today-day-select');
-            const yearSelect = document.getElementById('today-year-select');
-            monthSelect.innerHTML = '';
-            monthNames.forEach((month, index) => {
-                const option = document.createElement('option');
-                option.value = index;
-                option.textContent = month;
-                monthSelect.appendChild(option);
-            });
-            const currentYear = new Date().getFullYear();
-            yearSelect.innerHTML = '';
-            for (let i = currentYear - 50; i <= currentYear + 50; i++) {
-                const option = document.createElement('option');
-                option.value = i;
-                option.textContent = i;
-                yearSelect.appendChild(option);
-            }
-            updateTodayDays();
-        };
-
-        const updateTodayDays = () => {
-            const monthSelect = document.getElementById('today-month-select');
-            const daySelect = document.getElementById('today-day-select');
-            const yearSelect = document.getElementById('today-year-select');
-            const selectedMonth = parseInt(monthSelect.value);
-            const selectedYear = parseInt(yearSelect.value);
-            const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
-            daySelect.innerHTML = '';
-            for (let i = 1; i <= daysInMonth; i++) {
-                const option = document.createElement('option');
-                option.value = i;
-                option.textContent = i;
-                daySelect.appendChild(option);
-            }
-            const currentDay = todayDate.getDate();
-            if (currentDay <= daysInMonth) {
-                daySelect.value = currentDay;
-            } else {
-                daySelect.value = 1;
-            }
-        };
-
-        const populateFriendSelectors = (date = new Date()) => {
-            const monthSelect = document.getElementById('friend-month-select');
-            const daySelect = document.getElementById('friend-day-select');
-            const yearSelect = document.getElementById('friend-year-select');
-            const currentYear = new Date().getFullYear();
-            
-            monthSelect.innerHTML = '';
-            monthNames.forEach((month, index) => {
-                const option = document.createElement('option');
-                option.value = index;
-                option.textContent = month;
-                monthSelect.appendChild(option);
-            });
-            
-            yearSelect.innerHTML = '';
-            for (let i = currentYear - 100; i <= currentYear; i++) {
-                const option = document.createElement('option');
-                option.value = i;
-                option.textContent = i;
-                yearSelect.appendChild(option);
-            }
-            
-            monthSelect.value = date.getMonth();
-            yearSelect.value = date.getFullYear();
-            updateFriendDays(date.getMonth(), date.getFullYear(), date.getDate());
-        };
-
-        const updateFriendDays = (selectedMonth, selectedYear, selectedDay) => {
-            const daySelect = document.getElementById('friend-day-select');
-            const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
-            daySelect.innerHTML = '';
-            for (let i = 1; i <= daysInMonth; i++) {
-                const option = document.createElement('option');
-                option.value = i;
-                option.textContent = i;
-                daySelect.appendChild(option);
-            }
-            if (selectedDay <= daysInMonth) {
-                daySelect.value = selectedDay;
-            } else {
-                daySelect.value = 1;
-            }
-        };
-
-        document.addEventListener('DOMContentLoaded', async () => {
+            // Load the user's preferred week start from local storage.
+            // A website cannot read the device's native settings.
             const savedWeekStart = localStorage.getItem('startWeekOnMonday');
             if (savedWeekStart !== null) {
                 startWeekOnMonday = savedWeekStart === 'true';
             }
-            updateToggleButtonText();
-            updateCurrentSubjectDisplay();
-            populateSelectors();
-            populateTodaySelectors();
-            populateFriendSelectors(currentBirthday);
-
-            await initializeFirebase();
-            showPage('page1');
-
-            document.getElementById('add-friend-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const form = e.target;
-                const name = form['friend-name'].value;
-                const month = parseInt(form['friend-month-select'].value);
-                const day = parseInt(form['friend-day-select'].value);
-                const year = parseInt(form['friend-year-select'].value);
-                const bday = new Date(year, month, day);
-
-                const editId = form.dataset.editId;
-
-                if (editId) {
-                    await updateFriend(editId, name, bday);
-                } else {
-                    await addFriend(name, bday);
-                }
-                resetFriendForm();
-            });
-
-            document.getElementById('friend-month-select').addEventListener('change', () => {
-                const month = parseInt(document.getElementById('friend-month-select').value);
-                const year = parseInt(document.getElementById('friend-year-select').value);
-                const day = parseInt(document.getElementById('friend-day-select').value);
-                updateFriendDays(month, year, day);
-            });
-
-            document.getElementById('friend-year-select').addEventListener('change', () => {
-                const month = parseInt(document.getElementById('friend-month-select').value);
-                const year = parseInt(document.getElementById('friend-year-select').value);
-                const day = parseInt(document.getElementById('friend-day-select').value);
-                updateFriendDays(month, year, day);
-            });
-
-            document.getElementById('cancel-edit-btn').addEventListener('click', resetFriendForm);
-
-            // Add event listeners for navigation buttons
-            document.getElementById('nav-colors').addEventListener('click', () => showPage('page1'));
-            document.getElementById('nav-bars').addEventListener('click', () => showPage('page2'));
-            document.getElementById('nav-today').addEventListener('click', () => {
-                todayDate = new Date();
-                showPage('page3');
-            });
-            document.getElementById('nav-friends').addEventListener('click', () => showPage('page5'));
-            document.getElementById('nav-help').addEventListener('click', () => showPage('page4'));
             
-            // Add event listeners for month/year selectors and arrows
-            document.getElementById('month-select').addEventListener('change', updateCalendarFromSelects);
-            document.getElementById('year-select').addEventListener('change', updateCalendarFromSelects);
-            document.getElementById('prev-month-btn').addEventListener('click', () => changeMonth('prev'));
-            document.getElementById('next-month-btn').addEventListener('click', () => changeMonth('next'));
-            document.getElementById('week-start-toggle').addEventListener('click', toggleWeekStart);
+            // Update the button text to reflect the loaded setting
+            updateToggleButtonText();
 
-            // Add event listeners for today date selectors and arrows
-            document.getElementById('today-month-select').addEventListener('change', () => {
-                updateTodayDays();
-                updateTodayFromSelects();
-            });
-            document.getElementById('today-day-select').addEventListener('change', updateTodayFromSelects);
-            document.getElementById('today-year-select').addEventListener('change', () => {
-                updateTodayDays();
-                updateTodayFromSelects();
-            });
-            document.getElementById('prev-day-btn').addEventListener('click', () => changeDay('prev'));
-            document.getElementById('next-day-btn').addEventListener('click', () => changeDay('next'));
+            // Initialize all selectors and render the initial page
+            populateSelectors();
+            populateBirthdaySelectors();
+            populateTodaySelectors();
+            showPage('page1');
         });
     </script>
 </body>
